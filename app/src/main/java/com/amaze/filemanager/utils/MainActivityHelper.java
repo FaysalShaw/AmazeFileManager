@@ -633,38 +633,13 @@ public class MainActivityHelper {
           @Override
           public void launchSAF(HybridFile file, HybridFile file1) {}
 
-          @Override
-          public void done(HybridFile hFile, final boolean b) {
-            ma.getActivity()
-                .runOnUiThread(
-                    () -> {
-                      if (b) {
-                        ma.updateList(false);
-                      } else {
-                        Toast.makeText(
-                                ma.getActivity(),
-                                ma.getString(R.string.operation_unsuccesful),
-                                Toast.LENGTH_SHORT)
-                            .show();
-                      }
-                    });
-          }
+         public void done(HybridFile hFile, final boolean b) { 
+                mkDir.this.done(hFile, b);
+            }
 
-          @Override
-          public void invalidName(final HybridFile file) {
-            ma.getActivity()
-                .runOnUiThread(
-                    () -> {
-                      if (toast != null) toast.cancel();
-                      Toast.makeText(
-                              ma.getActivity(),
-                              ma.getString(R.string.invalid_name)
-                                  + ": "
-                                  + file.getName(ma.getMainActivity()),
-                              Toast.LENGTH_LONG)
-                          .show();
-                    });
-          }
+            public void invalidName(final HybridFile file) {
+                mkDir.this.invalidName(file);
+            }
         });
   }
 
