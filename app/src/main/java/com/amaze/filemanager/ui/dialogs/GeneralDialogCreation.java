@@ -269,6 +269,49 @@ public class GeneralDialogCreation {
         }
       }
 
+// new extracted method
+
+      private void buildDeletionList(LayoutElementParcelable layoutElement) {
+    if (layoutElement.isDirectory) {
+        // Don't add newline between category and list.
+        if (counterDirectories != 0) {
+            directories.append("\n");
+        }
+
+        long sizeDirectory = layoutElement.generateBaseFile().folderSize(context);
+
+        directories
+            .append(++counterDirectories)
+            .append(". ")
+            .append(layoutElement.title)
+            .append(" (")
+            .append(Formatter.formatFileSize(context, sizeDirectory))
+            .append(")");
+        sizeTotal += sizeDirectory;
+        // Build list of files to delete.
+    } else {
+        // Don't add newline between category and list.
+        if (counterFiles != 0) {
+            files.append("\n");
+        }
+
+        files
+            .append(++counterFiles)
+            .append(". ")
+            .append(layoutElement.title)
+            .append(" (")
+            .append(layoutElement.size)
+            .append(")");
+        sizeTotal += layoutElement.longSize;
+    }
+
+    publishProgress(sizeTotal, counterFiles, counterDirectories, files, directories);
+}
+
+// extract ends here 
+
+
+      
       @Override
       protected Void doInBackground(Void... params) {
 
@@ -278,42 +321,11 @@ public class GeneralDialogCreation {
           if (needConfirmation) {
             // Build list of directories to delete.
             if (layoutElement.isDirectory) {
-              // Don't add newline between category and list.
-              if (counterDirectories != 0) {
-                directories.append("\n");
-              }
-
-              long sizeDirectory = layoutElement.generateBaseFile().folderSize(context);
-
-              directories
-                  .append(++counterDirectories)
-                  .append(". ")
-                  .append(layoutElement.title)
-                  .append(" (")
-                  .append(Formatter.formatFileSize(context, sizeDirectory))
-                  .append(")");
-              sizeTotal += sizeDirectory;
-              // Build list of files to delete.
-            } else {
-              // Don't add newline between category and list.
-              if (counterFiles != 0) {
-                files.append("\n");
-              }
-
-              files
-                  .append(++counterFiles)
-                  .append(". ")
-                  .append(layoutElement.title)
-                  .append(" (")
-                  .append(layoutElement.size)
-                  .append(")");
-              sizeTotal += layoutElement.longSize;
+             buildDeletionList(layoutElement);
             }
-
-            publishProgress(sizeTotal, counterFiles, counterDirectories, files, directories);
-          }
         }
         return null;
+      }
       }
 
       @Override
@@ -484,51 +496,17 @@ public class GeneralDialogCreation {
         total.setText(context.getString(R.string.loading));
       }
 
-      @Override
-      protected Void doInBackground(Void... params) {
-
-        for (int i = 0; i < positions.size(); i++) {
-          final LayoutElementParcelable layoutElement = positions.get(i);
-          itemsToDelete.add(layoutElement.generateBaseFile());
-          // Build list of directories to delete.
-          if (layoutElement.isDirectory) {
-            // Don't add newline between category and list.
-            if (counterDirectories != 0) {
-              directories.append("\n");
-            }
-
-            long sizeDirectory = layoutElement.generateBaseFile().folderSize(context);
-
-            directories
-                .append(++counterDirectories)
-                .append(". ")
-                .append(layoutElement.title)
-                .append(" (")
-                .append(Formatter.formatFileSize(context, sizeDirectory))
-                .append(")");
-            sizeTotal += sizeDirectory;
-            // Build list of files to delete.
-          } else {
-            // Don't add newline between category and list.
-            if (counterFiles != 0) {
-              files.append("\n");
-            }
-
-            files
-                .append(++counterFiles)
-                .append(". ")
-                .append(layoutElement.title)
-                .append(" (")
-                .append(layoutElement.size)
-                .append(")");
-            sizeTotal += layoutElement.longSize;
-          }
-
-          publishProgress(sizeTotal, counterFiles, counterDirectories, files, directories);
-        }
-        return null;
-      }
-
+     @Override
+protected Void doInBackground(Void... params) {
+    for (int i = 0; i < positions.size(); i++) {
+        final LayoutElementParcelable layoutElement = positions.get(i);
+        itemsToDelete.add(layoutElement.generateBaseFile());
+        
+        // Call the extracted method to handle list building for directories and files
+        buildDeletionList(layoutElement);
+    }
+    return null;
+}
       @Override
       protected void onProgressUpdate(Object... result) {
         super.onProgressUpdate(result);
